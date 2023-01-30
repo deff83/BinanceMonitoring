@@ -3,128 +3,70 @@ package org.example;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.general.Asset;
 import com.binance.api.client.domain.market.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class Main extends Application {
 
-
+    public Task task;
 
     public static void main(String[] args) {
-        String file ="C:\\Users\\artem\\Desktop\\jjj\\writeBinance.xls";
 
-        Excel excel = null;
-        excel = new Excel();
-
-        try {
-            excel.readFile(file);
-        } catch (IOException e) {
-           // throw new RuntimeException(e);
-        }
-
-        System.out.println("Hello world!");
-        BinanceAPI binanceAPI = BinanceAPI.getBinanceAPI();
-        BinanceApiRestClient client = binanceAPI.getClient();
-
-        List<TickerStatistics> list2 = client.getAll24HrPriceStatistics();
-        List<String> assetList = new ArrayList<>();
-
-        for (int k1=0; k1<list2.size(); k1++){
-            TickerStatistics tickerPrice = list2.get(k1);
-            String name = tickerPrice.getSymbol();
-
-            System.out.println(k1+"     "+name);
-            if ((k1%50)==0) {
-                System.out.println(k1 + "/" + list2.size());
-            }
-            if (excel.checkName(name)){
-                assetList.add(name);
-
-                continue;
-            }else{
-                //System.out.println(name);
-            }
-            try {
-                OrderBook orderBook2 = client.getOrderBook(name, 1);
-                if (orderBook2.getBids().size()==0) continue;
-            }catch (Exception e){
-                k1--;
-                Problem.getInstance().problemInternet();
-                continue;
-            }
+        Application.launch();
 
 
 
-            assetList.add(name);
-        }
-        binanceAPI.setAssetList(assetList);
-        List<String> list = binanceAPI.getAssetList();
+    }
 
-        System.out.println(binanceAPI.getAssetList().toString());
+    @Override
+    public void start(Stage primaryStage) throws Exception {
 
-        int[] massiv = {1, 2, 3, 4, 5, 12, 24, 24*2, 24*3, 24*4, 24*5};
-        String[] massiv_str = {"1H", "2H", "3H", "4H", "5H", "12H", "1D", "2D", "3D", "4D", "5D"};
-
-        System.out.println("Старт "+0+"/"+list.size()+"");
-
-        try {
-            int ii = 1;
-            /*for (String name: list){
-                excel.writeRowCell(ii,1,name+"", ExcelFormat.STRING, null);
-            }*/
-            for (int jj = 0; jj < massiv.length; jj++) {
-                excel.writeRowCell(1, jj + 2, massiv_str[jj], ExcelFormat.STRING, null);
-            }
-
-            for(int k2=0; k2<list.size(); k2++){
-                String name = list.get(k2);
-                int i = k2+1;
-                //String name = tickerPrice.getSymbol();
-                try {
-                    List<Candlestick> candlestickIntervalList = client.getCandlestickBars(name, CandlestickInterval.HOURLY);
-
-
-                    excel.writeRowCell(i, 1, name + "", ExcelFormat.STRING, null);
-                    Double close = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size() - 1).getClose());
-
-                    for (int j = 0; j < massiv.length; j++) {
-                        int z_mass = massiv[j];
-                        try {
-                            Double open_1H = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size() - z_mass).getOpen());
-                            //excel.writeRowCell(1, j + 2, massiv_str[j], ExcelFormat.STRING, null);
-                            excel.writeRowCell(i, j + 2, (100 * ((close - open_1H) / open_1H)) + "", ExcelFormat.DOUBLE, "0.0");
-                        } catch (Exception e) {
-                        }
-                    }
-                }catch (Exception e){
-                    k2--;
-                    Problem.getInstance().problemInternet();
-                    continue;
-                }
-
-                //System.out.println(i);
-                if ((i%50)==0) {
-                    excel.writeIntoExcel(file);
-                    System.out.println("Запись "+i +"/"+list.size()+"");
-                }
-            }
-
-
-            //excel.writeRowCell(1,2,"1004.00000001", ExcelFormat.DOUBLE, null);
-            //excel.writeRowCell(2,2,"50", ExcelFormat.STRING, null);
-            //excel.writeRowCell(3,2,"300", ExcelFormat.INT, "0.01");
-
-            excel.writeIntoExcel("C:\\Users\\artem\\Desktop\\jjj\\writeBinance.xls");
-            System.out.println("Запись "+list.size() +"/"+list.size()+"");
-            excel.closeStreem();
+        AnchorPane root = new AnchorPane();
+        FlowPane root_flow_up = new FlowPane();
 
 
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ProgressBar bar = new ProgressBar();
+        Label label = new Label();
+        label.setText("test");
 
+        task = new Info(label);
+
+        bar.prefWidthProperty().bind(root_flow_up.widthProperty().subtract(20));;
+        bar.progressProperty().bind(task.progressProperty());
+        AnchorPane.setTopAnchor(root_flow_up, 10.0);
+        new Thread(task).start();
+        root_flow_up.setLayoutX(10.0);
+        root_flow_up.setLayoutY(10.0);
+        root_flow_up.getChildren().addAll(bar,label);
+        root.getChildren().addAll(root_flow_up);
+
+        Scene scene = new Scene(root, 500, 100);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        
+        primaryStage.show();
+
+
+    }
+
+    @Override
+    public void stop() throws Exception {
+        task.cancel();
+        super.stop();
+        System.exit(0);
     }
 }
