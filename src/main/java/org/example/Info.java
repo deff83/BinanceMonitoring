@@ -40,7 +40,16 @@ public class Info extends Task {
         BinanceAPI binanceAPI = BinanceAPI.getBinanceAPI();
         BinanceApiRestClient client = binanceAPI.getClient();
 
-        List<TickerStatistics> list2 = client.getAll24HrPriceStatistics();
+        List<TickerStatistics> list2 = new ArrayList<>();
+
+        while (list2.size()==0){
+            try {
+                list2 = client.getAll24HrPriceStatistics();
+            }catch (Exception e) {
+                new Problem(label, "Internet problem:" + "0: not list statistic24").problemInternet();
+            }
+        }
+
         List<String> assetList = new ArrayList<>();
 
         for (int k1=0; k1<list2.size(); k1++){
@@ -48,10 +57,11 @@ public class Info extends Task {
             String name = tickerPrice.getSymbol();
             updateProgress(k1, list2.size());
             final int o = k1;
+            final int max_o = list2.size();
             Platform.runLater(new Runnable() {
                                   @Override
                                   public void run() {
-                                      label.setText("Checking: "+name+"\t\t\t"+o + "/" + list2.size());
+                                      label.setText("Checking: "+name+"\t\t\t"+o + "/" + max_o);
                                   }
                               });
             //System.out.println(k1+"     "+name);
@@ -70,7 +80,7 @@ public class Info extends Task {
                 if (orderBook2.getBids().size()==0) continue;
             }catch (Exception e){
                 k1--;
-                Problem.getInstance().problemInternet();
+                new Problem(label, "Internet problem:"+o + "/" + list2.size()).problemInternet();
                 continue;
             }
 
@@ -127,7 +137,8 @@ public class Info extends Task {
                     }
                 }catch (Exception e){
                     k2--;
-                    Problem.getInstance().problemInternet();
+                    new Problem(label, "Internet problem:"+o + "/" + list.size()).problemInternet();
+
                     continue;
                 }
 
