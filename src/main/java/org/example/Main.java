@@ -30,12 +30,14 @@ public class Main {
 
         List<TickerStatistics> list2 = client.getAll24HrPriceStatistics();
         List<String> assetList = new ArrayList<>();
-        int y = 0;
-        for (TickerStatistics tickerPrice: list2){
+
+        for (int k1=0; k1<list2.size(); k1++){
+            TickerStatistics tickerPrice = list2.get(k1);
             String name = tickerPrice.getSymbol();
-            y++;
-            if ((y%50)==0) {
-                System.out.println(y + "/" + list2.size());
+
+            System.out.println(k1+"     "+name);
+            if ((k1%50)==0) {
+                System.out.println(k1 + "/" + list2.size());
             }
             if (excel.checkName(name)){
                 assetList.add(name);
@@ -44,9 +46,16 @@ public class Main {
             }else{
                 //System.out.println(name);
             }
+            try {
+                OrderBook orderBook2 = client.getOrderBook(name, 1);
+                if (orderBook2.getBids().size()==0) continue;
+            }catch (Exception e){
+                k1--;
+                Problem.getInstance().problemInternet();
+                continue;
+            }
 
-            OrderBook orderBook2 = client.getOrderBook(name,1);
-            if (orderBook2.getBids().size()==0) continue;
+
 
             assetList.add(name);
         }
@@ -69,23 +78,31 @@ public class Main {
                 excel.writeRowCell(1, jj + 2, massiv_str[jj], ExcelFormat.STRING, null);
             }
 
-            int i = 1;
-            for (String name: list){
-                i++;
+            for(int k2=0; k2<list.size(); k2++){
+                String name = list.get(k2);
+                int i = k2+1;
                 //String name = tickerPrice.getSymbol();
-                List<Candlestick> candlestickIntervalList = client.getCandlestickBars(name, CandlestickInterval.HOURLY);
-                excel.writeRowCell(i,1,name+"", ExcelFormat.STRING, null);
-                Double close = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size()-1).getClose());
+                try {
+                    List<Candlestick> candlestickIntervalList = client.getCandlestickBars(name, CandlestickInterval.HOURLY);
 
-                for (int j = 0; j < massiv.length; j++) {
-                    int z_mass = massiv[j];
-                    try {
-                        Double open_1H = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size() - z_mass).getOpen());
-                        //excel.writeRowCell(1, j + 2, massiv_str[j], ExcelFormat.STRING, null);
-                        excel.writeRowCell(i, j + 2, (100 * ((close - open_1H) / open_1H)) + "", ExcelFormat.DOUBLE, "0.0");
-                    }catch (Exception e){}
+
+                    excel.writeRowCell(i, 1, name + "", ExcelFormat.STRING, null);
+                    Double close = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size() - 1).getClose());
+
+                    for (int j = 0; j < massiv.length; j++) {
+                        int z_mass = massiv[j];
+                        try {
+                            Double open_1H = Double.parseDouble(candlestickIntervalList.get(candlestickIntervalList.size() - z_mass).getOpen());
+                            //excel.writeRowCell(1, j + 2, massiv_str[j], ExcelFormat.STRING, null);
+                            excel.writeRowCell(i, j + 2, (100 * ((close - open_1H) / open_1H)) + "", ExcelFormat.DOUBLE, "0.0");
+                        } catch (Exception e) {
+                        }
+                    }
+                }catch (Exception e){
+                    k2--;
+                    Problem.getInstance().problemInternet();
+                    continue;
                 }
-
 
                 //System.out.println(i);
                 if ((i%50)==0) {
