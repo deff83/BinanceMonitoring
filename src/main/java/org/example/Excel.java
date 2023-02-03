@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 public class Excel {
+    private final CellStyle cellStyle1;
+    private final CellStyle cellStyle2;
     private DataFormat format;
     private CellStyle dateStyle;
     private Workbook book= new HSSFWorkbook();
@@ -26,6 +28,17 @@ public class Excel {
         sheet = book.createSheet("ListPriceChange");
         dateStyle = book.createCellStyle();
         format = book.createDataFormat();
+
+        cellStyle1 = sheet.getWorkbook().createCellStyle();
+        cellStyle1.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("0.00"));
+        cellStyle1.setFillForegroundColor(IndexedColors.ROSE.getIndex());
+        cellStyle1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        cellStyle2 = sheet.getWorkbook().createCellStyle();
+        cellStyle2.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("0.00"));
+        cellStyle2.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
+        cellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
     }
 
     public void readFile(String file) throws IOException {
@@ -48,6 +61,24 @@ public class Excel {
                 saveNames.add(cell_r.getStringCellValue()+"");
             }catch (Exception e){e.printStackTrace();}
         }
+    }
+    public void setColorCell(int row_s, int cell_s, int index_s){
+        Row row_w = sheet.getRow(row_s-1);
+        if (row_w==null) row_w = sheet.createRow(row_s-1);
+        Cell cell = row_w.getCell(cell_s-1);
+        if (cell==null) cell = row_w.createCell(cell_s-1);
+
+        switch (index_s){
+            case 1:
+                cell.setCellStyle(cellStyle1);
+                break;
+            case 2:
+                cell.setCellStyle(cellStyle2);
+                break;
+        }
+
+        sheet.autoSizeColumn(cell_s-1);
+
     }
 
     public boolean checkName(String name){
