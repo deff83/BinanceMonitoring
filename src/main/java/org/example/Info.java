@@ -22,6 +22,7 @@ public class Info extends Task {
     private boolean checkbox_filter = false;
     private boolean bool_isk = true;
     private String textfield = "USDT";
+    private double percent = 5;
 
     public Info(Label label){
         this.label = label;
@@ -115,7 +116,7 @@ public class Info extends Task {
         System.out.println(binanceAPI.getAssetList().toString());
 
         List<Integer> massiv = new ArrayList<>();
-        String[] massiv_str = {"1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "11H", "12H", "13H", "14H", "15H", "16H", "17H", "18H", "19H", "20H", "21H", "22H", "23H", "1D", "2D", "3D", "4D", "5D"};
+        String[] massiv_str = {"1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "11H", "12H", "13H", "14H", "15H", "16H", "17H", "18H", "19H", "20H", "21H", "22H", "23H", "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D"};
 
         for (int i_m=0; i_m<massiv_str.length; i_m++){
             String mas_t = massiv_str[i_m];
@@ -169,16 +170,27 @@ public class Info extends Task {
                             Double izm = (100 * ((close - open_1H) / open_1H));
                             excel.writeRowCell(i, j + 2,  izm + "", ExcelFormat.DOUBLE, "0.00");
                             //System.out.println(izm);
+
                             if (izm<0d){
-                                excel.setColorCell(i, j + 2, 1);
+                                if (izm<-percent){
+                                    excel.setColorCell(i, j + 2, 3);
+                                }else {
+                                    excel.setColorCell(i, j + 2, 1);
+                                }
                                 //System.out.println("<0");
 
                             }
                             if (izm>0d){
-                                excel.setColorCell(i, j + 2, 2);
+                                if (izm>percent) {
+                                    excel.setColorCell(i, j + 2, 4);
+                                }else {
+                                    excel.setColorCell(i, j + 2, 2);
+                                }
                                 //System.out.println(">0");
                                 continue;
                             }
+
+
 
 
                         } catch (Exception e) {

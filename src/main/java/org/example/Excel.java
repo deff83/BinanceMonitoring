@@ -15,6 +15,8 @@ import java.util.List;
 public class Excel {
     private final CellStyle cellStyle1;
     private final CellStyle cellStyle2;
+    private final CellStyle cellStyle3;
+    private final CellStyle cellStyle4;
     private DataFormat format;
     private CellStyle dateStyle;
     private Workbook book= new HSSFWorkbook();
@@ -36,8 +38,18 @@ public class Excel {
 
         cellStyle2 = sheet.getWorkbook().createCellStyle();
         cellStyle2.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("0.00"));
-        cellStyle2.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
+        cellStyle2.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
         cellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        cellStyle3 = sheet.getWorkbook().createCellStyle();
+        cellStyle3.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("0.00"));
+        cellStyle3.setFillForegroundColor(IndexedColors.RED.getIndex());
+        cellStyle3.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        cellStyle4 = sheet.getWorkbook().createCellStyle();
+        cellStyle4.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("0.00"));
+        cellStyle4.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
+        cellStyle4.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
     }
 
@@ -74,6 +86,12 @@ public class Excel {
                 break;
             case 2:
                 cell.setCellStyle(cellStyle2);
+                break;
+            case 3:
+                cell.setCellStyle(cellStyle3);
+                break;
+            case 4:
+                cell.setCellStyle(cellStyle4);
                 break;
         }
 
